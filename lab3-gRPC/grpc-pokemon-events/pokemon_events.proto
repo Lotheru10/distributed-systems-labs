@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "sr.grpc.gen";
+option java_outer_classname = "sr.grpc.PokemonEventsServer";
+
+package pokemon_events;
+
+message PokemonRequest {
+  int32 user_id = 1;
+
+  oneof payload {
+    Subscribe subscribe = 2;
+    Unsubscribe unsubscribe = 3;
+    Ack ack = 4;
+  }
+}
+
+message PokemonResponse {
+  oneof payload {
+    SubscribeConfirm confirmed = 1;
+    Notification notification = 2;
+    ServerError error = 3;
+  }
+}
+
+service PokemonEvents {
+  rpc Event (stream PokemonRequest) returns (stream PokemonResponse) {}
+}
+
+message Subscribe{
+  EventType event = 1;
+  string city = 2;
+  repeated PokemonType types = 3;
+  int32 min_level = 4;
+}
+
+message Unsubscribe{
+  int32 subscription_id = 1;
+  string reason = 2;
+}
+
+enum EventType{
+  EVENT_UNSPECIFIED = 0;
+  RAID = 1;
+  SPAWN = 2;
+  COMMUNITY_DAY = 3;
+  EGG = 4;
+}
+
+enum PokemonType {
+  TYPE_UNSPECIFIED =0;
+  NORMAL = 1;
+  WATER = 2;
+  ELECTRIC = 3;
+  GRASS = 4;
+  ICE = 5;
+  FIGHTING = 6;
+  POISON = 7;
+  GROUND = 8;
+  FLYING = 9;
+  PSYCHIC = 10;
+  BUG = 11;
+  ROCK = 12;
+  GHOST = 13;
+  DRAGON = 14;
+  DARK = 15;
+  STEEL = 16;
+  FAIRY = 17;
+  FIRE = 18;
+}
+
+message SubscribeConfirm{
+  int32 subscription_id = 1;
+}
+message Ack {
+  int32 notification_id = 1;
+}
+message Notification{
+  int32 notification_id = 1;
+  int32 subscription_id = 2;
+  PokemonEvent event = 3;
+}
+
+message PokemonEvent {
+  int32 event_id = 1;
+  EventType event_type = 2;
+  string city = 3;
+  string pokemon_name = 4;
+  repeated PokemonType types = 5;
+  int32 level = 6;
+}
+message ServerError {
+  ErrorCode code = 1;
+  string message = 2;
+}
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  INVALID_REQUEST = 1;
+  SUBSCRIPTION_NOT_FOUND = 2;
+  INTERNAL_ERROR = 3;
+}
+
+

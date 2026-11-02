@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pokedex</title>
+</head>
+<body>
+  <h1>Find Pokemon</h1>
+
+  <input type="text" id="pokemonName" placeholder="Enter pokemon name" />
+  <button onclick="loadPokemon()">Search</button>
+
+  <h2 id="pokemonTitle"></h2>
+  <img id="pokemonImage" alt="Pokemon image" style="display:none; max-width:200px;" />
+
+  <h3>Moves</h3>
+  <select id="movesSelect">
+    <option value="">Choose move</option>
+  </select>
+
+  <h3>Color</h3>
+  <button onclick="loadPokemonColor()">Analyze Color</button>
+
+  <p id="colorName"></p>
+  <div id="colorBox" style="width:100px;height:100px;"></div>
+
+  <script>
+
+    async function loadPokemonColor() {
+  const name = document.getElementById("pokemonName").value.trim();
+  if (!name) return;
+
+    const res = await fetch(`/pokemon/${name}/color`, {
+  headers: {
+    "X-API-Key": "secret"
+  }
+});
+  if (!res.ok) {
+    alert("Failed to analyze color");
+    return;
+  }
+
+  const data = await res.json();
+
+  document.getElementById("colorName").textContent =
+    "Color: " + data.color_name;
+
+  document.getElementById("colorBox").style.backgroundColor =
+    "#" + data.dominant_color;
+}
+    async function loadPokemon() {
+      const name = document.getElementById("pokemonName").value.trim();
+      if (!name) return;
+
+      const response = await fetch(`/pokemon/${name}`);
+
+      if (!response.ok) {
+        alert("Pokemon not found");
+        return;
+      }
+
+      const data = await response.json();
+
+      document.getElementById("pokemonTitle").textContent =
+        `${data.name} (#${data.id})`;
+
+      const image = document.getElementById("pokemonImage");
+      if (data.img_url) {
+        image.src = data.img_url;
+        image.style.display = "block";
+      } else {
+        image.style.display = "none";
+      }
+
+      const select = document.getElementById("movesSelect");
+      select.innerHTML = '<option value="">Choose move</option>';
+
+      for (const move of data.moves) {
+        const option = document.createElement("option");
+        option.value = move;
+        option.textContent = move;
+        select.appendChild(option);
+      }
+    }
+  </script>
+</body>
+</html>
